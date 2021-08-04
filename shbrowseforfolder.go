@@ -66,14 +66,14 @@ func init() {
 	browseFolderCallbackPtr = syscall.NewCallback(browseFolderCallback)
 }
 
-func Show(owner win.HWND, title string, rootDirPath string, initSelectedPath string, flags uint32) (accepted bool, selectedPath string, err error) {
+func Show(owner win.HWND, title string, rootDirPath string, initSelectedPath string, flags uint32) (selectedPath string, accepted bool, err error) {
 	defer func() {
 		initialized = nil
 	}()
 
 	// Calling OleInitialize (or similar) is required for BIF_NEWDIALOGSTYLE.
 	if hr := win.OleInitialize(); hr != win.S_OK && hr != win.S_FALSE {
-		return false, "", newError(fmt.Sprint("OleInitialize Error: ", hr))
+		return "", false, newError(fmt.Sprint("OleInitialize Error: ", hr))
 	}
 	defer win.OleUninitialize()
 
@@ -101,7 +101,7 @@ func Show(owner win.HWND, title string, rootDirPath string, initSelectedPath str
 
 	pidl := win.SHBrowseForFolder(&bi)
 	if pidl == 0 {
-		return false, "", nil
+		return "", false, nil
 	}
 	defer win.CoTaskMemFree(pidl)
 
